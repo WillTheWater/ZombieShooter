@@ -123,7 +123,9 @@ void Player::Update(float elapsedTime, sf::Vector2i mousePosition)
 	if (m_Position.x < m_Arena.left + m_TileSize) { m_Position.x = m_Arena.left + m_TileSize; }
 	if (m_Position.y > m_Arena.height - m_TileSize) { m_Position.y = m_Arena.height - m_TileSize; }
 	if (m_Position.y < m_Arena.top + m_TileSize) { m_Position.y = m_Arena.top + m_TileSize; }
-	float facingAngle = (atan2(mousePosition.y - m_ScreenResolution.y / 2.f, mousePosition.x - m_ScreenResolution.x / 2.f) * 180) / 3.141f;
+	float facingAngle = atan2(mousePosition.y - m_ScreenResolution.y / 2.f,
+		                      mousePosition.x - m_ScreenResolution.x / 2.f);
+	facingAngle = (facingAngle * 180.0f) / 3.14159265f;
 	m_Sprite.setRotation(facingAngle);
 }
 
