@@ -7,7 +7,7 @@ Player::Player()
 	m_MaxHealth = m_StartHealth;
 	m_Texture.loadFromFile("graphics/player.png");
 	m_Sprite.setTexture(m_Texture);
-	m_Sprite.setOrigin(m_Sprite.getGlobalBounds().width / 2.f, m_Sprite.getGlobalBounds().height / 2.f);
+	m_Sprite.setOrigin(25,25);
 }
 
 void Player::Spawn(sf::IntRect arena, sf::Vector2f resolution, int tileSize)
@@ -19,9 +19,9 @@ void Player::Spawn(sf::IntRect arena, sf::Vector2f resolution, int tileSize)
 	m_Arena.top           = arena.top;
 	m_Arena.height        = arena.height;
 	m_TileSize            = tileSize;
-	m_ScreenResolution    = resolution;
-	m_ScreenResolution.x  = resolution.x;
-	m_ScreenResolution.y  = resolution.y;
+	m_Resolution    = resolution;
+	m_Resolution.x  = resolution.x;
+	m_Resolution.y  = resolution.y;
 }
 
 void Player::ResetPlayerStats()
@@ -112,7 +112,7 @@ void Player::StopDown()
 	m_DownPressed = false;
 }
 
-void Player::Update(float elapsedTime, sf::Vector2i mousePosition)
+void Player::Update(float elapsedTime, sf::Vector2f mouseWorldPosition)
 {
 	if (m_UpPressed) { m_Position.y -= m_Speed * elapsedTime; }
 	if (m_DownPressed) { m_Position.y += m_Speed * elapsedTime; }
@@ -123,9 +123,9 @@ void Player::Update(float elapsedTime, sf::Vector2i mousePosition)
 	if (m_Position.x < m_Arena.left + m_TileSize) { m_Position.x = m_Arena.left + m_TileSize; }
 	if (m_Position.y > m_Arena.height - m_TileSize) { m_Position.y = m_Arena.height - m_TileSize; }
 	if (m_Position.y < m_Arena.top + m_TileSize) { m_Position.y = m_Arena.top + m_TileSize; }
-	float facingAngle = atan2(mousePosition.y - m_ScreenResolution.y / 2.f, mousePosition.x - m_ScreenResolution.x / 2.f);
-	facingAngle = (facingAngle * 180.0f) / 3.14159265f;
-	m_Sprite.setRotation(facingAngle);
+	float angle = (atan2(mouseWorldPosition.y - m_Resolution.y / 2.f,
+		mouseWorldPosition.x - m_Resolution.x / 2.f) * 180.f) / 3.141f;
+	m_Sprite.setRotation(angle);
 }
 
 void Player::UpgradeSpeed()

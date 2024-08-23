@@ -113,10 +113,10 @@ int main()
 			gameTimeTotal += dt;
 			float deltaTime = dt.asSeconds();
 			// Mouse Position
-			mouseScreenPosition = sf::Mouse::getPosition();
-			mouseWorldPosition = window.mapPixelToCoords(sf::Mouse::getPosition(), mainView);
+			mouseScreenPosition = sf::Mouse::getPosition(window);
+			mouseWorldPosition = window.mapPixelToCoords(mouseScreenPosition, mainView);
 			// Update Player
-			player.Update(deltaTime, sf::Mouse::getPosition());
+			player.Update(deltaTime, mouseWorldPosition);
 			sf::Vector2f playerPosition(player.GetCenter());
 			// Center view around the player
 			mainView.setCenter(player.GetCenter());
