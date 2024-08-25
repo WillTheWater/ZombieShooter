@@ -2,9 +2,9 @@
 
 Player::Player()
 {
-	m_Speed     = m_StartSpeed;
-	m_Health    = m_StartHealth;
-	m_MaxHealth = m_StartHealth;
+	m_Speed			= m_StartSpeed;
+	m_Health		= m_StartHealth;
+	m_MaxHealth		= m_StartHealth;
 	m_Texture.loadFromFile("graphics/player.png");
 	m_Sprite.setTexture(m_Texture);
 	m_Sprite.setOrigin(25,25);
@@ -19,16 +19,16 @@ void Player::Spawn(sf::IntRect arena, sf::Vector2f resolution, int tileSize)
 	m_Arena.top           = arena.top;
 	m_Arena.height        = arena.height;
 	m_TileSize            = tileSize;
-	m_Resolution    = resolution;
-	m_Resolution.x  = resolution.x;
-	m_Resolution.y  = resolution.y;
+	m_Resolution		  = resolution;
+	m_Resolution.x		  = resolution.x;
+	m_Resolution.y		  = resolution.y;
 }
 
 void Player::ResetPlayerStats()
 {
-	m_Speed     = m_StartSpeed;
-	m_Health    = m_StartHealth;
-	m_MaxHealth = m_StartHealth;
+	m_Speed				= m_StartSpeed;
+	m_Health			= m_StartHealth;
+	m_MaxHealth			= m_StartHealth;
 }
 
 sf::Time Player::GetLastHitTime()
@@ -41,8 +41,8 @@ bool Player::Hit(sf::Time timeHit)
 {
 	if (timeHit.asMilliseconds() - m_LastHit.asMilliseconds() > 200)
 	{
-		m_LastHit = timeHit;
-		m_Health -= 10;
+		m_LastHit	= timeHit;
+		m_Health	-= 10;
 		return true;
 	}
 	else { return false; }

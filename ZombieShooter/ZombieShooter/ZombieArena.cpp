@@ -1,4 +1,5 @@
-#include "SFML/Graphics.hpp"
+#include <iostream>
+#include "ZombieArena.h"
 #include "Player.h"
 
 
@@ -7,7 +8,7 @@ int main()
     // Game State enum class
 	enum class GameState{PAUSED, LEVELING_UP, GAME_OVER, PLAYING};
 	// Starting Game State
-	GameState gameState = GameState::PLAYING;
+	GameState gameState = GameState::GAME_OVER;
 	// Getting screen resolution for the game window
 	sf::Vector2f resolution;
 	resolution.x = 1920; //sf::VideoMode::getDesktopMode().width;
@@ -27,6 +28,10 @@ int main()
 	Player player;
 	// Creating the arena bounderies
 	sf::IntRect arena;
+	// Creating Background
+	sf::VertexArray background;
+	sf::Texture textureBackground;
+	textureBackground.loadFromFile("graphics/background_sheet.png");
 	
 
 	// Game Loop
@@ -43,23 +48,24 @@ int main()
 			if (event.type == sf::Event::KeyPressed)
 			{
 				// Pausing the game
-				if (event.key.code == sf::Keyboard::Enter && gameState == GameState::PLAYING)
+				if (event.key.code == sf::Keyboard::Return && gameState == GameState::PLAYING)
 				{
 					gameState == GameState::PAUSED;
 				}
-				else if (event.key.code == sf::Keyboard::Enter && gameState == GameState::PAUSED)
+				else if (event.key.code == sf::Keyboard::Return && gameState == GameState::PAUSED)
 				{
 					gameState == GameState::PLAYING;
 					// Restart play clock
 					clock.restart();
 				}
-				else if (event.key.code == sf::Keyboard::Enter && gameState == GameState::GAME_OVER)
+				else if (event.key.code == sf::Keyboard::Return && gameState == GameState::GAME_OVER)
 				{
 					gameState == GameState::LEVELING_UP;
+					std::cout << "Game Leveling Up\n";
 				}
 				if (gameState == GameState::PLAYING)
 				{
-
+					std::cout << "Game Playing\n";
 				}
 			}
 		}// End of Event polling
@@ -96,7 +102,7 @@ int main()
 				arena.height    = 500;
 				arena.left      = 0;
 				arena.top       = 0;
-				int tileSize    = 50;
+				int tileSize    = CreateBackground(background, arena);
 				player.Spawn(arena, resolution, tileSize);
 				clock.restart();
 			}
@@ -114,7 +120,7 @@ int main()
 			float deltaTime = dt.asSeconds();
 			// Mouse Position
 			mouseScreenPosition = sf::Mouse::getPosition(window);
-			mouseWorldPosition = window.mapPixelToCoords(mouseScreenPosition, mainView);
+			mouseWorldPosition = window.mapPixelToCoords(sf::Mouse::getPosition(), mainView);
 			// Update Player
 			player.Update(deltaTime, mouseWorldPosition);
 			sf::Vector2f playerPosition(player.GetCenter());
@@ -130,6 +136,7 @@ int main()
 		{
 			window.clear();
 			window.setView(mainView);
+			window.draw(background, &textureBackground);
 			window.draw(player.GetSprite());
 		}
 		if (gameState == GameState::LEVELING_UP)
@@ -146,10 +153,6 @@ int main()
 		}
 		window.display();
 	}// Exit Game Loop
-
-
-
-
 
 	return 0;
 }
