@@ -16,7 +16,7 @@ public:
 	void					MoveRight();
 	void					MoveUp();
 	void					MoveDown();
-	void					Update(float elapsedTime, sf::Vector2f mouseWorldPosition);
+	void					Update(float elapsedTime, sf::Vector2i mouseWorldPosition);
 	void					UpgradeSpeed();
 	void					UpgradeHealth();
 	void					IncreaseHealthLevel(int amount);

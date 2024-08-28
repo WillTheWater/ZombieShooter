@@ -1,158 +1,266 @@
-#include <iostream>
+#include <SFML/Graphics.hpp>
+
 #include "ZombieArena.h"
 #include "Player.h"
 
+using namespace sf;
 
 int main()
 {
-    // Game State enum class
-	enum class GameState{PAUSED, LEVELING_UP, GAME_OVER, PLAYING};
-	// Starting Game State
-	GameState gameState = GameState::GAME_OVER;
-	// Getting screen resolution for the game window
-	sf::Vector2f resolution;
-	resolution.x = 1920; //sf::VideoMode::getDesktopMode().width;
-	resolution.y = 1080; //sf::VideoMode::getDesktopMode().height;
-	sf::RenderWindow window(sf::VideoMode(resolution.x, resolution.y), "Zombie Surviver", sf::Style::Titlebar);
-	// Create SFML view for the main player view
-	sf::View mainView(sf::FloatRect(0, 0, resolution.x, resolution.y));
-	// Game clock for calulating deltaTime
-	sf::Clock clock;
-	// Time alapsed for Game State
-	sf::Time gameTimeTotal;
-	// Mouse postion relative to the world
-	sf::Vector2f mouseWorldPosition;
-	// Mouse relative to the window screen
-	sf::Vector2i mouseScreenPosition;
-	// Creating a Player intance
-	Player player;
-	// Creating the arena bounderies
-	sf::IntRect arena;
-	// Creating Background
-	sf::VertexArray background;
-	sf::Texture textureBackground;
-	textureBackground.loadFromFile("graphics/background_sheet.png");
-	
+	// The game will always be in one of four states
+	enum class State { PAUSED, LEVELING_UP, GAME_OVER, PLAYING };
+	// Start with the GAME_OVER state
+	State state = State::GAME_OVER;
 
-	// Game Loop
+	// Get the screen resolution and create an SFML window
+	Vector2f resolution;
+	resolution.x = 1920;// VideoMode::getDesktopMode().width;
+	resolution.y = 1080;// VideoMode::getDesktopMode().height;
+
+	RenderWindow window(VideoMode(resolution.x, resolution.y),
+		"Zombie Arena", Style::Titlebar);
+
+	// Create a an SFML View for the main action
+	View mainView(sf::FloatRect(0, 0, resolution.x, resolution.y));
+
+	// Here is our clock for timing everything
+	Clock clock;
+	// How long has the PLAYING state been active
+	Time gameTimeTotal;
+
+	// Where is the mouse in relation to world coordinates
+	Vector2f mouseWorldPosition;
+	// Where is the mouse in relation to screen coordinates
+	Vector2i mouseScreenPosition;
+
+	// Create an instance of the Player class
+	Player player;
+
+	// The boundaries of the arena
+	IntRect arena;
+
+	// Create the background
+	VertexArray background;
+	// Load the texture for our background vertex array
+	Texture textureBackground;
+	textureBackground.loadFromFile("graphics/background_sheet.png");
+
+	// The main game loop
 	while (window.isOpen())
 	{
 		/*
-		**********************************
-		*		  Input Handling
-		**********************************
+		************
+		Handle input
+		************
 		*/
-		sf::Event event;
+
+		// Handle events
+		Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::KeyPressed)
+			if (event.type == Event::KeyPressed)
 			{
-				// Pausing the game
-				if (event.key.code == sf::Keyboard::Return && gameState == GameState::PLAYING)
+				// Pause a game while playing
+				if (event.key.code == Keyboard::Return &&
+					state == State::PLAYING)
 				{
-					gameState == GameState::PAUSED;
+					state = State::PAUSED;
 				}
-				else if (event.key.code == sf::Keyboard::Return && gameState == GameState::PAUSED)
+
+				// Restart while paused
+				else if (event.key.code == Keyboard::Return &&
+					state == State::PAUSED)
 				{
-					gameState == GameState::PLAYING;
-					// Restart play clock
+					state = State::PLAYING;
+					// Reset the clock so there isn't a frame jump
 					clock.restart();
 				}
-				else if (event.key.code == sf::Keyboard::Return && gameState == GameState::GAME_OVER)
+
+				// Start a new game while in GAME_OVER state
+				else if (event.key.code == Keyboard::Return &&
+					state == State::GAME_OVER)
 				{
-					gameState == GameState::LEVELING_UP;
-					std::cout << "Game Leveling Up\n";
+					state = State::LEVELING_UP;
 				}
-				if (gameState == GameState::PLAYING)
+
+				if (state == State::PLAYING)
 				{
-					std::cout << "Game Playing\n";
 				}
+
 			}
-		}// End of Event polling
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+		}// End event polling
+
+
+		 // Handle the player quitting
+		if (Keyboard::isKeyPressed(Keyboard::Escape))
 		{
 			window.close();
 		}
-		// Handling Player controls
-		if (gameState == GameState::PLAYING)
+
+		// Handle controls while playing
+		if (state == State::PLAYING)
 		{
-			// WASD controller
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { player.MoveUp(); }
-			else { player.StopUp(); }
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { player.MoveDown(); }
-			else { player.StopDown(); }
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) { player.MoveLeft(); }
-			else { player.StopLeft(); }
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { player.MoveRight(); }
-			else { player.StopRight(); }
-		}// End of Player Controller
-		// Player Leveling
-		if (gameState == GameState::LEVELING_UP)
-		{
-			//Player Level controls
-			if (event.key.code == sf::Keyboard::Num1) { gameState == GameState::PLAYING; }
-			if (event.key.code == sf::Keyboard::Num2) { gameState == GameState::PLAYING; }
-			if (event.key.code == sf::Keyboard::Num3) { gameState == GameState::PLAYING; }
-			if (event.key.code == sf::Keyboard::Num4) { gameState == GameState::PLAYING; }
-			if (event.key.code == sf::Keyboard::Num5) { gameState == GameState::PLAYING; }
-			if (event.key.code == sf::Keyboard::Num6) { gameState == GameState::PLAYING; }
-			if (gameState == GameState::PLAYING)
+			// Handle the pressing and releasing of the WASD keys
+			if (Keyboard::isKeyPressed(Keyboard::W))
 			{
-				arena.width     = 500;
-				arena.height    = 500;
-				arena.left      = 0;
-				arena.top       = 0;
-				int tileSize    = CreateBackground(background, arena);
+				player.MoveUp();
+			}
+			else
+			{
+				player.StopUp();
+			}
+
+			if (Keyboard::isKeyPressed(Keyboard::S))
+			{
+				player.MoveDown();
+			}
+			else
+			{
+				player.StopDown();
+			}
+
+			if (Keyboard::isKeyPressed(Keyboard::A))
+			{
+				player.MoveLeft();
+			}
+			else
+			{
+				player.StopLeft();
+			}
+
+			if (Keyboard::isKeyPressed(Keyboard::D))
+			{
+				player.MoveRight();
+			}
+			else
+			{
+				player.StopRight();
+			}
+
+		}// End WASD while playing
+
+		 // Handle the levelling up state
+		if (state == State::LEVELING_UP)
+		{
+			// Handle the player levelling up
+			if (event.key.code == Keyboard::Num1)
+			{
+				state = State::PLAYING;
+			}
+
+			if (event.key.code == Keyboard::Num2)
+			{
+				state = State::PLAYING;
+			}
+
+			if (event.key.code == Keyboard::Num3)
+			{
+				state = State::PLAYING;
+			}
+
+			if (event.key.code == Keyboard::Num4)
+			{
+				state = State::PLAYING;
+			}
+
+			if (event.key.code == Keyboard::Num5)
+			{
+				state = State::PLAYING;
+			}
+
+			if (event.key.code == Keyboard::Num6)
+			{
+				state = State::PLAYING;
+			}
+
+			if (state == State::PLAYING)
+			{
+				// Prepare thelevel
+				// We will modify the next two lines later
+				arena.width = 500;
+				arena.height = 500;
+				arena.left = 0;
+				arena.top = 0;
+
+				// Pass the vertex array by reference 
+				// to the createBackground function
+				int tileSize = CreateBackground(background, arena);
+
+				// Spawn the player in the middle of the arena
 				player.Spawn(arena, resolution, tileSize);
+
+				// Reset the clock so there isn't a frame jump
 				clock.restart();
 			}
-		}// End of Player leveling
-		/*
-		**********************************
-		*		 Updating Frame
-		**********************************
-		*/
-		if (gameState == GameState::PLAYING)
+		}// End levelling up
+
+		 /*
+		 ****************
+		 UPDATE THE FRAME
+		 ****************
+		 */
+		if (state == State::PLAYING)
 		{
-			// Defining deltaTime
-			sf::Time dt = clock.restart();
+			// Update the delta time
+			Time dt = clock.restart();
+			// Update the total game time
 			gameTimeTotal += dt;
-			float deltaTime = dt.asSeconds();
-			// Mouse Position
-			mouseScreenPosition = sf::Mouse::getPosition(window);
-			mouseWorldPosition = window.mapPixelToCoords(sf::Mouse::getPosition(), mainView);
-			// Update Player
-			player.Update(deltaTime, mouseWorldPosition);
-			sf::Vector2f playerPosition(player.GetCenter());
-			// Center view around the player
+			// Make a decimal fraction of 1 from the delta time
+			float dtAsSeconds = dt.asSeconds();
+
+			// Where is the mouse pointer
+			mouseScreenPosition = Mouse::getPosition();
+
+			// Convert mouse position to world coordinates of mainView
+			mouseWorldPosition = window.mapPixelToCoords(
+				Mouse::getPosition(), mainView);
+
+			// Update the player
+			player.Update(dtAsSeconds, Mouse::getPosition(window));
+
+			// Make a note of the players new position
+			Vector2f playerPosition(player.GetCenter());
+
+			// Make the view centre around the player				
 			mainView.setCenter(player.GetCenter());
-		}// End Updating
-		/*
-		**********************************
-		*		   Drawing
-		**********************************
-		*/
-		if (gameState == GameState::PLAYING)
+		}// End updating the scene
+
+		 /*
+		 **************
+		 Draw the scene
+		 **************
+		 */
+
+		if (state == State::PLAYING)
 		{
 			window.clear();
+
+			// set the mainView to be displayed in the window
+			// And draw everything related to it
 			window.setView(mainView);
+
+			// Draw the background
 			window.draw(background, &textureBackground);
+
+			// Draw the player
 			window.draw(player.GetSprite());
 		}
-		if (gameState == GameState::LEVELING_UP)
-		{
 
-		}
-		if (gameState == GameState::PAUSED)
+		if (state == State::LEVELING_UP)
 		{
-
 		}
-		if (gameState == GameState::GAME_OVER)
+
+		if (state == State::PAUSED)
 		{
-
 		}
+
+		if (state == State::GAME_OVER)
+		{
+		}
+
 		window.display();
-	}// Exit Game Loop
+
+	}// End game loop
 
 	return 0;
 }

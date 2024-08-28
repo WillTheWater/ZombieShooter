@@ -12,14 +12,14 @@ Player::Player()
 
 void Player::Spawn(sf::IntRect arena, sf::Vector2f resolution, int tileSize)
 {
-	m_Position.x          = arena.width / 2.f;
-	m_Position.y          = arena.height / 2.f;
+	m_Position.x          = arena.width / 2;
+	m_Position.y          = arena.height / 2;
 	m_Arena.left          = arena.left;
 	m_Arena.width         = arena.width;
 	m_Arena.top           = arena.top;
 	m_Arena.height        = arena.height;
 	m_TileSize            = tileSize;
-	m_Resolution		  = resolution;
+	//m_Resolution		  = resolution;
 	m_Resolution.x		  = resolution.x;
 	m_Resolution.y		  = resolution.y;
 }
@@ -112,7 +112,7 @@ void Player::StopDown()
 	m_DownPressed = false;
 }
 
-void Player::Update(float elapsedTime, sf::Vector2f mouseWorldPosition)
+void Player::Update(float elapsedTime, sf::Vector2i mouseWorldPosition)
 {
 	if (m_UpPressed) { m_Position.y -= m_Speed * elapsedTime; }
 	if (m_DownPressed) { m_Position.y += m_Speed * elapsedTime; }
@@ -123,19 +123,19 @@ void Player::Update(float elapsedTime, sf::Vector2f mouseWorldPosition)
 	if (m_Position.x < m_Arena.left + m_TileSize) { m_Position.x = m_Arena.left + m_TileSize; }
 	if (m_Position.y > m_Arena.height - m_TileSize) { m_Position.y = m_Arena.height - m_TileSize; }
 	if (m_Position.y < m_Arena.top + m_TileSize) { m_Position.y = m_Arena.top + m_TileSize; }
-	float angle = (atan2(mouseWorldPosition.y - m_Resolution.y / 2.f,
-		mouseWorldPosition.x - m_Resolution.x / 2.f) * 180.f) / 3.141f;
+	float angle = (atan2(mouseWorldPosition.y - m_Resolution.y / 2,
+		mouseWorldPosition.x - m_Resolution.x / 2) * 180) / 3.141;
 	m_Sprite.setRotation(angle);
 }
 
 void Player::UpgradeSpeed()
 {
-	m_Speed += (m_StartSpeed * 0.2f);
+	m_Speed += (m_StartSpeed * 0.2);
 }
 
 void Player::UpgradeHealth()
 {
-	m_MaxHealth += (m_MaxHealth * 0.2f);
+	m_MaxHealth += (m_MaxHealth * 0.2);
 }
 
 void Player::IncreaseHealthLevel(int amount)
