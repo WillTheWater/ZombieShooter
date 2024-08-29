@@ -134,11 +134,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CreateBackground.cpp" />
+    <ClCompile Include="TextureHolder.cpp" />
+    <ClCompile Include="Zombie.cpp" />
     <ClCompile Include="ZombieArena.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h" />
+    <ClInclude Include="TextureHolder.h" />
+    <ClInclude Include="Zombie.h" />
     <ClInclude Include="ZombieArena.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
