@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CreateBackground.cpp" />
+    <ClCompile Include="CreateHorde.cpp" />
     <ClCompile Include="TextureHolder.cpp" />
     <ClCompile Include="Zombie.cpp" />
     <ClCompile Include="ZombieArena.cpp" />
