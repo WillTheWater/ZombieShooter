@@ -1,12 +1,12 @@
 #include "Player.h"
+#include "TextureHolder.h"
 
 Player::Player()
 {
 	m_Speed			= m_StartSpeed;
 	m_Health		= m_StartHealth;
 	m_MaxHealth		= m_StartHealth;
-	m_Texture.loadFromFile("graphics/player.png");
-	m_Sprite.setTexture(m_Texture);
+	m_Sprite = sf::Sprite(TextureHolder::GetTexture("graphics/player.png"));
 	m_Sprite.setOrigin(25,25);
 }
 

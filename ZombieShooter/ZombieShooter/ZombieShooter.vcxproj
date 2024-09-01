@@ -77,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)ExternalLibrary\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="CreateBackground.cpp" />
     <ClCompile Include="CreateHorde.cpp" />
     <ClCompile Include="TextureHolder.cpp" />
@@ -141,6 +143,7 @@
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="TextureHolder.h" />
     <ClInclude Include="Zombie.h" />

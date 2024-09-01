@@ -12,7 +12,7 @@ public:
 	static sf::Texture& GetTexture(std::string const& filename);
 
 private:
-	// A map container from theSTL,
+	// A map container from the STL,
 	// that holds related pairs of string and texture
 	std::map<std::string, sf::Texture> m_Textures;
 
