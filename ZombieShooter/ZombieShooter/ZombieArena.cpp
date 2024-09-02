@@ -1,23 +1,28 @@
 #include <SFML/Graphics.hpp>
-
 #include "ZombieArena.h"
 #include "Player.h"
 #include "TextureHolder.h"
+#include "Bullet.h"
+
+
 
 using namespace sf;
 
 int main()
 {
+	// Here is the instance of TextureHolder
 	TextureHolder holder;
+
 	// The game will always be in one of four states
 	enum class State { PAUSED, LEVELING_UP, GAME_OVER, PLAYING };
 	// Start with the GAME_OVER state
 	State state = State::GAME_OVER;
 
+
 	// Get the screen resolution and create an SFML window
 	Vector2f resolution;
-	resolution.x = 1920;// VideoMode::getDesktopMode().width;
-	resolution.y = 1080;// VideoMode::getDesktopMode().height;
+	resolution.x = VideoMode::getDesktopMode().width;
+	resolution.y = VideoMode::getDesktopMode().height;
 
 	RenderWindow window(VideoMode(resolution.x, resolution.y),
 		"Zombie Arena", Style::Titlebar);
@@ -44,11 +49,39 @@ int main()
 	// Create the background
 	VertexArray background;
 	// Load the texture for our background vertex array
-	Texture textureBackground = TextureHolder::GetTexture("graphics/background_sheet.png");
+	Texture textureBackground = TextureHolder::GetTexture(
+		"graphics/background_sheet.png");
 
+	// Prepare for a horde of zombies
 	int numZombies;
 	int numZombiesAlive;
-	Zombie* zombies = nullptr;
+	Zombie* zombies = NULL;
+
+	// 100 bullets should do
+	Bullet bullets[100];
+	int currentBullet = 0;
+	int bulletsSpare = 24;
+	int bulletsInClip = 6;
+	int clipSize = 6;
+	float fireRate = 1;
+	// When was the fire button last pressed?
+	Time lastPressed;
+
+	// Hide the mouse pointer and replace it with crosshair
+	
+	Image crosshairCursor;
+	crosshairCursor.loadFromFile("graphics/crosshair.png");
+	Cursor crosshairs;
+	crosshairs.loadFromPixels(crosshairCursor.getPixelsPtr(), crosshairCursor.getSize(),{ 0,0 });
+	window.setMouseCursor(crosshairs);
+
+	// Create a couple of pickups
+	//Pickup healthPickup(1);
+	//Pickup ammoPickup(2);
+
+	// About the game
+	int score = 0;
+	int hiScore = 0;
 
 	// The main game loop
 	while (window.isOpen())
@@ -90,6 +123,27 @@ int main()
 
 				if (state == State::PLAYING)
 				{
+					// Reloading
+					if (event.key.code == Keyboard::R)
+					{
+						if (bulletsSpare >= clipSize)
+						{
+							// Plenty of bullets. Reload.
+							bulletsInClip = clipSize;
+							bulletsSpare -= clipSize;
+						}
+						else if (bulletsSpare > 0)
+						{
+							// Only few bullets left
+							bulletsInClip = bulletsSpare;
+							bulletsSpare = 0;
+						}
+						else
+						{
+							// More here soon?!
+						}
+					}
+
 				}
 
 			}
@@ -141,6 +195,34 @@ int main()
 			{
 				player.StopRight();
 			}
+			// Fire a bullet
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			{
+
+				if (gameTimeTotal.asMilliseconds()
+					- lastPressed.asMilliseconds()
+					> 1000 / fireRate && bulletsInClip > 0)
+				{
+
+					// Pass the centre of the player 
+					// and the centre of the cross-hair
+					// to the shoot function
+					bullets[currentBullet].shoot(
+						player.GetCenter().x, player.GetCenter().y,
+						mouseWorldPosition.x, mouseWorldPosition.y);
+
+					currentBullet++;
+					if (currentBullet > 99)
+					{
+						currentBullet = 0;
+					}
+					lastPressed = gameTimeTotal;
+
+					bulletsInClip--;
+				}
+
+			}// End fire a bullet
+
 
 		}// End WASD while playing
 
@@ -194,10 +276,14 @@ int main()
 				// Spawn the player in the middle of the arena
 				player.Spawn(arena, resolution, tileSize);
 
-				// Create zombies
+				// Configure the pick-ups
+				//healthPickup.setArena(arena);
+				//ammoPickup.setArena(arena);
+
+				// Create a horde of zombies
 				numZombies = 10;
 
-				// Delete prviously allocated memory if it exists
+				// Delete the previously allocated memory (if it exists)
 				delete[] zombies;
 				zombies = createHorde(numZombies, arena);
 				numZombiesAlive = numZombies;
@@ -228,8 +314,11 @@ int main()
 			mouseWorldPosition = window.mapPixelToCoords(
 				Mouse::getPosition(), mainView);
 
+			// Set the crosshair to the mouse world location
+			//spriteCrosshair.setPosition(mouseWorldPosition);
+
 			// Update the player
-			player.Update(dtAsSeconds, Mouse::getPosition(window));
+			player.Update(dtAsSeconds, Mouse::getPosition());
 
 			// Make a note of the players new position
 			Vector2f playerPosition(player.GetCenter());
@@ -237,7 +326,7 @@ int main()
 			// Make the view centre around the player				
 			mainView.setCenter(player.GetCenter());
 
-			// Loop through ach zomnie and update
+			// Loop through each Zombie and update them
 			for (int i = 0; i < numZombies; i++)
 			{
 				if (zombies[i].IsAlive())
@@ -245,6 +334,93 @@ int main()
 					zombies[i].Update(dt.asSeconds(), playerPosition);
 				}
 			}
+
+			// Update any bullets that are in-flight
+			for (int i = 0; i < 100; i++)
+			{
+				if (bullets[i].isInFlight())
+				{
+					bullets[i].update(dtAsSeconds);
+				}
+			}
+
+			// Update the pickups
+			//healthPickup.update(dtAsSeconds);
+			//ammoPickup.update(dtAsSeconds);
+
+			// Collision detection
+			// Have any zombies been shot?
+			for (int i = 0; i < 100; i++)
+			{
+				for (int j = 0; j < numZombies; j++)
+				{
+					if (bullets[i].isInFlight() &&
+						zombies[j].IsAlive())
+					{
+						if (bullets[i].getPosition().intersects
+						(zombies[j].GetPosition()))
+						{
+							// Stop the bullet
+							bullets[i].stop();
+
+							// Register the hit and see if it was a kill
+							if (zombies[j].Hit()) {
+								// Not just a hit but a kill too
+								score += 10;
+								if (score >= hiScore)
+								{
+									hiScore = score;
+								}
+
+								numZombiesAlive--;
+
+								// When all the zombies are dead (again)
+								if (numZombiesAlive == 0) {
+									state = State::LEVELING_UP;
+								}
+							}
+
+						}
+					}
+
+				}
+			}// End zombie being shot
+
+			 // Have any zombies touched the player			
+			for (int i = 0; i < numZombies; i++)
+			{
+				if (player.GetPosition().intersects
+				(zombies[i].GetPosition()) && zombies[i].IsAlive())
+				{
+
+					if (player.Hit(gameTimeTotal))
+					{
+						// More here later
+					}
+
+					if (player.GetHealth() <= 0)
+					{
+						state = State::GAME_OVER;
+
+					}
+				}
+			}// End player touched
+
+			 // Has the player touched health pickup
+			/*if (player.GetPosition().intersects
+			(healthPickup.getPosition()) && healthPickup.isSpawned())
+			{
+				player.increaseHealthLevel(healthPickup.gotIt());
+
+			}
+
+			// Has the player touched ammo pickup
+			if (player.getPosition().intersects
+			(ammoPickup.getPosition()) && ammoPickup.isSpawned())
+			{
+				bulletsSpare += ammoPickup.gotIt();
+
+			}*/
 
 
 		}// End updating the scene
@@ -272,8 +448,32 @@ int main()
 				window.draw(zombies[i].GetSprite());
 			}
 
+			for (int i = 0; i < 100; i++)
+			{
+				if (bullets[i].isInFlight())
+				{
+					window.draw(bullets[i].getShape());
+				}
+			}
+
+
 			// Draw the player
 			window.draw(player.GetSprite());
+
+			// Draw the pick-ups, if currently spawned
+			/*if (ammoPickup.isSpawned())
+			{
+				window.draw(ammoPickup.getSprite());
+			}
+			if (healthPickup.isSpawned())
+			{
+				window.draw(healthPickup.getSprite());
+			}*/
+
+
+			//Draw the crosshair
+			//window.draw(spriteCrosshair);
+
 		}
 
 		if (state == State::LEVELING_UP)
@@ -291,6 +491,6 @@ int main()
 		window.display();
 
 	}// End game loop
-	delete[] zombies;
+
 	return 0;
 }
