@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "TextureHolder.h"
 #include "Bullet.h"
+#include "Pickup.h"
 
 
 
@@ -76,8 +77,8 @@ int main()
 	window.setMouseCursor(crosshairs);
 
 	// Create a couple of pickups
-	//Pickup healthPickup(1);
-	//Pickup ammoPickup(2);
+	Pickup healthPickup(1);
+	Pickup ammoPickup(2);
 
 	// About the game
 	int score = 0;
@@ -277,8 +278,8 @@ int main()
 				player.Spawn(arena, resolution, tileSize);
 
 				// Configure the pick-ups
-				//healthPickup.setArena(arena);
-				//ammoPickup.setArena(arena);
+				healthPickup.SetArena(arena);
+				ammoPickup.SetArena(arena);
 
 				// Create a horde of zombies
 				numZombies = 10;
@@ -345,8 +346,8 @@ int main()
 			}
 
 			// Update the pickups
-			//healthPickup.update(dtAsSeconds);
-			//ammoPickup.update(dtAsSeconds);
+			healthPickup.Update(dtAsSeconds);
+			ammoPickup.Update(dtAsSeconds);
 
 			// Collision detection
 			// Have any zombies been shot?
@@ -407,20 +408,20 @@ int main()
 			}// End player touched
 
 			 // Has the player touched health pickup
-			/*if (player.GetPosition().intersects
-			(healthPickup.getPosition()) && healthPickup.isSpawned())
+			if (player.GetPosition().intersects
+			(healthPickup.GetPosition()) && healthPickup.IsSpawned())
 			{
-				player.increaseHealthLevel(healthPickup.gotIt());
+				player.IncreaseHealthLevel(healthPickup.GotIt());
 
 			}
 
 			// Has the player touched ammo pickup
-			if (player.getPosition().intersects
-			(ammoPickup.getPosition()) && ammoPickup.isSpawned())
+			if (player.GetPosition().intersects
+			(ammoPickup.GetPosition()) && ammoPickup.IsSpawned())
 			{
-				bulletsSpare += ammoPickup.gotIt();
+				bulletsSpare += ammoPickup.GotIt();
 
-			}*/
+			}
 
 
 		}// End updating the scene
@@ -461,14 +462,14 @@ int main()
 			window.draw(player.GetSprite());
 
 			// Draw the pick-ups, if currently spawned
-			/*if (ammoPickup.isSpawned())
+			if (ammoPickup.IsSpawned())
 			{
-				window.draw(ammoPickup.getSprite());
+				window.draw(ammoPickup.GetSprite());
 			}
-			if (healthPickup.isSpawned())
+			if (healthPickup.IsSpawned())
 			{
-				window.draw(healthPickup.getSprite());
-			}*/
+				window.draw(healthPickup.GetSprite());
+			}
 
 
 			//Draw the crosshair
